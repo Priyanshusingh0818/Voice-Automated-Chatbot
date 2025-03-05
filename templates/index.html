@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot | Enhanced Version</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-neon: #0ff;
+            --secondary-neon: #f0f;
+            --bg-dark: #1a1a1a;
+            --text-light: #fff;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0); }
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a, #1a1a1a);
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2),
+                        0 0 40px rgba(0, 255, 255, 0.1),
+                        inset 0 0 20px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(45deg, var(--primary-neon), var(--secondary-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .chat-history {
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-neon) transparent;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background-color: var(--primary-neon);
+            border-radius: 3px;
+        }
+
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 15px;
+            max-width: 80%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .message:hover {
+            transform: translateY(-2px);
+        }
+
+        .user-message {
+            margin-left: auto;
+            background: linear-gradient(45deg, #2196f3, #21cbf3);
+            box-shadow: 0 3px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .bot-message {
+            margin-right: auto;
+            background: linear-gradient(45deg, #222, #333);
+            box-shadow: 0 3px 15px rgba(0, 255, 255, 0.2);
+            border: 1px solid var(--primary-neon);
+        }
+
+        .bot-message .content {
+            overflow: hidden;
+        }
+
+        .bot-message.typing .content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, var(--primary-neon), var(--secondary-neon));
+            color: var(--text-light);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .confidence {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: var(--primary-neon);
+            border-radius: 50%;
+            animation: typing-dot 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-dot {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .message-icon {
+            margin-right: 8px;
+            color: var(--primary-neon);
+        }
+
+        .particle {
+            position: fixed;
+            background: var(--primary-neon);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <div class="title-container">
+                <h1>AI Chatbot</h1>
+                <div class="subtitle">Powered by Advanced AI</div>
+            </div>
+            <div class="chat-history" id="chatHistory"></div>
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="questionInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+                </div>
+                <button onclick="askQuestion()">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle animation
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            document.body.appendChild(particle);
+
+            const size = Math.random() * 3 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            let angle = Math.random() * Math.PI * 2;
+            let velocity = Math.random() * 2 + 1;
+            let lifetime = Math.random() * 1000 + 500;
+            let opacity = 1;
+
+            function animate() {
+                lifetime -= 16;
+                opacity = lifetime / 1500;
+                x += Math.cos(angle) * velocity;
+                y += Math.sin(angle) * velocity;
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.opacity = opacity;
+
+                if (lifetime > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    particle.remove();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() < 0.1) {
+                createParticle(e.clientX, e.clientY);
+            }
+        });
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        }
+
+        async function askQuestion() {
+            const questionInput = document.getElementById('questionInput');
+            const chatHistory = document.getElementById('chatHistory');
+            const question = questionInput.value.trim();
+
+            if (!question) return;
+
+            // Add user message
+            chatHistory.innerHTML += `
+                <div class="message user-message">
+                    <i class="fas fa-user message-icon"></i>
+                    <span class="content">${question}</span>
+                </div>
+            `;
+
+            // Add typing indicator
+            const typingId = `typing-${Date.now()}`;
+            chatHistory.innerHTML += `
+                <div class="message bot-message" id="${typingId}">
+                    <i class="fas fa-robot message-icon"></i>
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+
+            // Clear input
+            questionInput.value = '';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                document.getElementById(typingId).remove();
+
+                if (response.ok) {
+                    // Add bot response with typing animation
+                    chatHistory.innerHTML += `
+                        <div class="message bot-message typing">
+                            <i class="fas fa-robot message-icon"></i>
+                            <div class="content">
+                                ${data.answer}
+                                <div class="confidence">Confidence: ${data.confidence}%</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    chatHistory.innerHTML += `
+                        <div class="message bot-message">
+                            <i class="fas fa-exclamation-triangle message-icon"></i>
+                            <div class="content">
+                                Sorry, I couldn't process your question.
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById(typingId).remove();
+                chatHistory.innerHTML += `
+                    <div class="message bot-message">
+                        <i class="fas fa-exclamation-triangle message-icon"></i>
+                        <div class="content">
+                            Sorry, something went wrong.
+                        </div>
+                    </div>
+                `;
+            }
+
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+    </script>
+</body>
+</html>
